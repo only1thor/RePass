@@ -79,7 +79,10 @@ document.getElementById('test-form').addEventListener('submit', async e => {
     testMsg.hidden = false;
     return;
   }
-  const list = load().map(s => s.id === testId ? { ...s, nextDue: nextDue(s.days) } : s);
+  const now = new Date().toISOString();
+  const list = load().map(s => s.id === testId
+    ? { ...s, nextDue: nextDue(s.days), lastVerified: now }
+    : s);
   save(list);
   testMsg.textContent = 'Verified. Next check ' + fmt(list.find(s => s.id === testId).nextDue) + '.';
   testMsg.className = 'msg success';
@@ -114,7 +117,7 @@ function render() {
       <span class="dot"></span>
       <div>
         <div class="name"></div>
-        <div class="meta">Every ${s.days}d · next ${fmt(s.nextDue)}</div>
+        <div class="meta">Every ${s.days}d · next ${fmt(s.nextDue)}${s.lastVerified ? ` · last ${fmt(s.lastVerified)}` : ''}</div>
       </div>
       <div class="actions">
         <button class="ghost test">Test</button>

@@ -115,7 +115,10 @@ function openMenu(id) {
 }
 
 function render() {
-  const list = load();
+  const list = load().sort((a, b) => {
+    const due = (isDue(b.nextDue) ? 1 : 0) - (isDue(a.nextDue) ? 1 : 0);
+    return due !== 0 ? due : a.nextDue.localeCompare(b.nextDue);
+  });
   const ul = document.getElementById('list');
   ul.innerHTML = '';
   if (!list.length) {

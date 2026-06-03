@@ -119,8 +119,6 @@ function render() {
     const due = (isDue(b.nextDue) ? 1 : 0) - (isDue(a.nextDue) ? 1 : 0);
     return due !== 0 ? due : a.nextDue.localeCompare(b.nextDue);
   });
-  document.getElementById('add-form').hidden = list.length > 0;
-  document.getElementById('add-btn').hidden = list.length === 0;
   const ul = document.getElementById('list');
   ul.innerHTML = '';
   if (!list.length) {
@@ -232,31 +230,6 @@ document.getElementById('import-form').addEventListener('submit', () => {
 
 importDlg.addEventListener('close', () => { pendingImport = null; });
 
-async function submitAdd(form, nameId, secretId, intervalId) {
-  const name = document.getElementById(nameId).value.trim();
-  const secret = document.getElementById(secretId).value;
-  const days = parseInt(document.getElementById(intervalId).value, 10);
-  if (!name || !secret) return false;
-  const btn = form.querySelector('button[type=submit]');
-  const origText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = 'Adding…';
-  try {
-    await addSecret(name, secret, days);
-    navigator.storage?.persist?.();
-  } finally {
-    btn.disabled = false;
-    btn.textContent = origText;
-  }
-  form.reset();
-  return true;
-}
-
-document.getElementById('add-form').addEventListener('submit', async e => {
-  e.preventDefault();
-  if (await submitAdd(e.target, 'name', 'secret', 'interval')) render();
-});
-
 const addDlg = document.getElementById('add-dialog');
 
 document.getElementById('add-btn').onclick = () => {
@@ -268,10 +241,23 @@ document.getElementById('add-dialog-cancel').onclick = () => addDlg.close();
 
 document.getElementById('add-dialog-form').addEventListener('submit', async e => {
   e.preventDefault();
-  if (await submitAdd(e.target, 'dialog-name', 'dialog-secret', 'dialog-interval')) {
-    addDlg.close();
-    render();
+  const name = document.getElementById('dialog-name').value.trim();
+  const secret = document.getElementById('dialog-secret').value;
+  const days = parseInt(document.getElementById('dialog-interval').value, 10);
+  if (!name || !secret) return;
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.disabled = true;
+  btn.textContent = 'Adding…';
+  try {
+    await addSecret(name, secret, days);
+    navigator.storage?.persist?.();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Add';
   }
+  e.target.reset();
+  addDlg.close();
+  render();
 });
 
 [menu, testDlg, importDlg, addDlg].forEach(dlg => {

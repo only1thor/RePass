@@ -1,4 +1,4 @@
-const APP_VERSION = 'v5';
+const APP_VERSION = 'v6';
 const KEY = 'repass_secrets_v2';
 const PBKDF2_ITERS = 600_000;
 localStorage.removeItem('repass_secrets');

@@ -93,6 +93,58 @@ li.due .dot { background: var(--due); }
 .name { font-weight: 500; }
 .meta { font-size: 0.8rem; color: var(--muted); }
 
-.actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.actions { display: flex; gap: 6px; align-items: center; }
 
 .empty { color: var(--muted); text-align: center; padding: 24px 0; }
+
+button.gear {
+  padding: 8px 10px;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+dialog {
+  border: none;
+  border-radius: 16px 16px 0 0;
+  padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  background: var(--bg);
+  color: var(--fg);
+  width: 100%;
+  max-width: 520px;
+  margin: auto auto 0;
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.2);
+}
+
+dialog::backdrop { background: rgba(0,0,0,0.4); }
+
+#edit-form {
+  display: grid;
+  gap: 14px;
+}
+
+#edit-form h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+#edit-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+#edit-form .row {
+  display: flex;
+  gap: 8px;
+}
+
+#edit-form .row button { flex: 1; }
+
+#edit-form .danger {
+  color: var(--due);
+  border-color: var(--due);
+  margin-top: 4px;
+}

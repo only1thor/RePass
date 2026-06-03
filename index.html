@@ -26,6 +26,20 @@
 
     <ul id="list"></ul>
   </main>
+
+  <dialog id="menu">
+    <form method="dialog" id="edit-form">
+      <h2 id="edit-title">Edit</h2>
+      <label>Name <input id="edit-name" type="text" required></label>
+      <label>Cycle (days) <input id="edit-days" type="number" min="1" required></label>
+      <div class="row">
+        <button type="button" id="edit-cancel" class="ghost">Cancel</button>
+        <button type="submit">Save</button>
+      </div>
+      <button type="button" id="edit-delete" class="ghost danger">Delete</button>
+    </form>
+  </dialog>
+
   <script src="script.js"></script>
 </body>
 </html>

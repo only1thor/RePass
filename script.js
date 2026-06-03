@@ -49,21 +49,16 @@ async function testSecret(id) {
   render();
 }
 
-function changeCycle(id) {
+const menu = document.getElementById('menu');
+
+function openMenu(id) {
   const item = load().find(s => s.id === id);
   if (!item) return;
-  const input = prompt(`New cycle for "${item.name}" (days):`, item.days);
-  const days = parseInt(input, 10);
-  if (!days || days < 1) return;
-  save(load().map(s => s.id === id ? { ...s, days, nextDue: nextDue(days) } : s));
-  render();
-}
-
-function deleteSecret(id) {
-  const item = load().find(s => s.id === id);
-  if (!item || !confirm(`Delete "${item.name}"?`)) return;
-  save(load().filter(s => s.id !== id));
-  render();
+  menu.dataset.id = id;
+  document.getElementById('edit-title').textContent = item.name;
+  document.getElementById('edit-name').value = item.name;
+  document.getElementById('edit-days').value = item.days;
+  menu.showModal();
 }
 
 function render() {
@@ -85,16 +80,36 @@ function render() {
       </div>
       <div class="actions">
         <button class="ghost test">Test</button>
-        <button class="ghost cycle">Cycle</button>
-        <button class="ghost del">Delete</button>
+        <button class="ghost gear" aria-label="Edit">⚙️</button>
       </div>`;
     li.querySelector('.name').textContent = s.name;
     li.querySelector('.test').onclick = () => testSecret(s.id);
-    li.querySelector('.cycle').onclick = () => changeCycle(s.id);
-    li.querySelector('.del').onclick = () => deleteSecret(s.id);
+    li.querySelector('.gear').onclick = () => openMenu(s.id);
     ul.appendChild(li);
   }
 }
+
+document.getElementById('edit-form').addEventListener('submit', e => {
+  const id = menu.dataset.id;
+  const name = document.getElementById('edit-name').value.trim();
+  const days = parseInt(document.getElementById('edit-days').value, 10);
+  if (!name || !days || days < 1) { e.preventDefault(); return; }
+  save(load().map(s => s.id === id
+    ? { ...s, name, days, nextDue: days !== s.days ? nextDue(days) : s.nextDue }
+    : s));
+  render();
+});
+
+document.getElementById('edit-cancel').onclick = () => menu.close();
+
+document.getElementById('edit-delete').onclick = () => {
+  const id = menu.dataset.id;
+  const item = load().find(s => s.id === id);
+  if (!item || !confirm(`Delete "${item.name}"?`)) return;
+  save(load().filter(s => s.id !== id));
+  menu.close();
+  render();
+};
 
 document.getElementById('add-form').addEventListener('submit', async e => {
   e.preventDefault();

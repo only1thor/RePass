@@ -75,7 +75,16 @@ document.getElementById('test-form').addEventListener('submit', async e => {
   e.preventDefault();
   const item = load().find(s => s.id === testId);
   if (!item) return testDlg.close();
-  const ok = (await hash(testInput.value, item.salt)) === item.hash;
+  const submitBtn = e.target.querySelector('button[type=submit]');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Verifying…';
+  let ok;
+  try {
+    ok = (await hash(testInput.value, item.salt)) === item.hash;
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Verify';
+  }
   if (!ok) {
     testMsg.textContent = 'Incorrect.';
     testMsg.className = 'msg error';
@@ -224,8 +233,16 @@ document.getElementById('add-form').addEventListener('submit', async e => {
   const secret = document.getElementById('secret').value;
   const days = parseInt(document.getElementById('interval').value, 10);
   if (!name || !secret) return;
-  await addSecret(name, secret, days);
-  navigator.storage?.persist?.();
+  const submitBtn = e.target.querySelector('button[type=submit]');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Adding…';
+  try {
+    await addSecret(name, secret, days);
+    navigator.storage?.persist?.();
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Add';
+  }
   e.target.reset();
   render();
 });

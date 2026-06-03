@@ -37,13 +37,13 @@
 
   <dialog id="menu">
     <form method="dialog" id="edit-form">
-      <h2 id="edit-title">Edit</h2>
+      <div class="sheet-head">
+        <button type="button" id="edit-cancel" class="link">Cancel</button>
+        <h2 id="edit-title">Edit</h2>
+        <button type="submit" class="link strong">Save</button>
+      </div>
       <label>Name <input id="edit-name" type="text" required></label>
       <label>Cycle (days) <input id="edit-days" type="number" min="1" required></label>
-      <div class="row">
-        <button type="button" id="edit-cancel" class="ghost">Cancel</button>
-        <button type="submit">Save</button>
-      </div>
       <button type="button" id="edit-delete" class="ghost danger">Delete</button>
     </form>
   </dialog>

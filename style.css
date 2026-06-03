@@ -115,11 +115,13 @@ button.gear {
 dialog {
   border: none;
   border-radius: 16px 16px 0 0;
-  padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
   background: var(--bg);
   color: var(--fg);
   width: 100%;
   max-width: 520px;
+  max-height: 90dvh;
+  overflow-y: auto;
   margin: auto auto 0;
   box-shadow: 0 -8px 32px rgba(0,0,0,0.2);
 }
@@ -131,12 +133,34 @@ dialog::backdrop { background: rgba(0,0,0,0.4); }
   gap: 14px;
 }
 
-#edit-form h2 {
+.sheet-head {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.sheet-head h2 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
+  text-align: center;
   word-break: break-word;
 }
+
+button.link {
+  background: transparent;
+  color: var(--fg);
+  border: none;
+  padding: 8px 4px;
+  min-height: 36px;
+  font-weight: 500;
+}
+
+button.link.strong { font-weight: 700; }
+
+.sheet-head button.link:first-child { justify-self: start; }
+.sheet-head button.link:last-child { justify-self: end; }
 
 #edit-form label {
   display: grid;
@@ -144,13 +168,6 @@ dialog::backdrop { background: rgba(0,0,0,0.4); }
   font-size: 0.85rem;
   color: var(--muted);
 }
-
-#edit-form .row {
-  display: flex;
-  gap: 8px;
-}
-
-#edit-form .row button { flex: 1; }
 
 #edit-form .danger {
   color: var(--due);

@@ -1,4 +1,4 @@
-const APP_VERSION = 'v3';
+const APP_VERSION = 'v4';
 const KEY = 'repass_secrets';
 const b64 = bytes => btoa(String.fromCharCode(...bytes));
 

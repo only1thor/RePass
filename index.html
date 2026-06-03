@@ -20,7 +20,10 @@
 
     <form id="add-form" autocomplete="off">
       <input id="name" type="text" placeholder="Name" required>
-      <input id="secret" type="password" placeholder="Secret" required>
+      <div class="pw">
+        <input id="secret" type="password" placeholder="Secret" required>
+        <button type="button" class="eye" data-target="secret" aria-label="Show secret">Show</button>
+      </div>
       <select id="interval">
         <option value="1">Daily</option>
         <option value="7" selected>Weekly</option>
@@ -83,7 +86,12 @@
         <h2 id="test-title">Test</h2>
         <button type="submit" class="link strong">Verify</button>
       </div>
-      <label>Secret <input id="test-input" type="password" autocomplete="off" required></label>
+      <label>Secret
+        <div class="pw">
+          <input id="test-input" type="password" autocomplete="off" required>
+          <button type="button" class="eye" data-target="test-input" aria-label="Show secret">Show</button>
+        </div>
+      </label>
       <p id="test-msg" class="msg" hidden></p>
     </form>
   </dialog>

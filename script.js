@@ -224,6 +224,16 @@ document.getElementById('add-form').addEventListener('submit', async e => {
   render();
 });
 
+document.querySelectorAll('.eye').forEach(btn => {
+  btn.onclick = () => {
+    const input = document.getElementById(btn.dataset.target);
+    const showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    btn.textContent = showing ? 'Show' : 'Hide';
+    btn.setAttribute('aria-label', showing ? 'Show secret' : 'Hide secret');
+  };
+});
+
 render();
 
 const versionEl = document.getElementById('version');

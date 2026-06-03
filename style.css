@@ -223,3 +223,19 @@ button.link.strong { font-weight: 700; }
   display: grid;
   gap: 14px;
 }
+
+.pw { position: relative; }
+.pw input { padding-right: 70px; width: 100%; }
+.pw .eye {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  padding: 6px 10px;
+  min-height: 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+}

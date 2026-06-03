@@ -44,7 +44,28 @@
       </div>
       <label>Name <input id="edit-name" type="text" required></label>
       <label>Cycle (days) <input id="edit-days" type="number" min="1" required></label>
-      <button type="button" id="edit-delete" class="ghost danger">Delete</button>
+      <div id="delete-idle">
+        <button type="button" id="edit-delete" class="ghost danger">Delete</button>
+      </div>
+      <div id="delete-confirming" hidden>
+        <p class="confirm-text">Delete this secret?</p>
+        <div class="row">
+          <button type="button" id="delete-no" class="ghost">Cancel</button>
+          <button type="button" id="delete-yes" class="ghost danger">Yes, delete</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="test">
+    <form method="dialog" id="test-form">
+      <div class="sheet-head">
+        <button type="button" id="test-cancel" class="link">Cancel</button>
+        <h2 id="test-title">Test</h2>
+        <button type="submit" class="link strong">Verify</button>
+      </div>
+      <label>Secret <input id="test-input" type="password" autocomplete="off" required></label>
+      <p id="test-msg" class="msg" hidden></p>
     </form>
   </dialog>
 

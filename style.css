@@ -5,6 +5,7 @@
   --line: #e5e7eb;
   --accent: #111;
   --due: #ef4444;
+  --ok: #10b981;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -15,6 +16,7 @@
     --line: #262626;
     --accent: #f5f5f4;
     --due: #f87171;
+    --ok: #34d399;
   }
 }
 
@@ -173,4 +175,30 @@ button.link.strong { font-weight: 700; }
   color: var(--due);
   border-color: var(--due);
   margin-top: 4px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+.row button { flex: 1; }
+
+.confirm-text {
+  margin: 8px 0 6px;
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--muted);
+}
+
+.msg {
+  margin: 0;
+  font-size: 0.9rem;
+  text-align: center;
+}
+.msg.error { color: var(--due); }
+.msg.success { color: var(--ok); }
+
+#test-form {
+  display: grid;
+  gap: 14px;
 }

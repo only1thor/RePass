@@ -1,4 +1,4 @@
-const APP_VERSION = 'v4';
+const APP_VERSION = 'v5';
 const KEY = 'repass_secrets';
 const b64 = bytes => btoa(String.fromCharCode(...bytes));
 
@@ -37,18 +37,42 @@ async function addSecret(name, secret, days) {
   save(list);
 }
 
-async function testSecret(id) {
+const testDlg = document.getElementById('test');
+const testMsg = document.getElementById('test-msg');
+const testInput = document.getElementById('test-input');
+let testId = null;
+
+function testSecret(id) {
   const item = load().find(s => s.id === id);
   if (!item) return;
-  const input = prompt(`Enter secret for "${item.name}":`);
-  if (input == null) return;
-  const ok = (await hash(input, item.salt)) === item.hash;
-  if (!ok) return alert('Incorrect.');
-  const list = load().map(s => s.id === id ? { ...s, nextDue: nextDue(s.days) } : s);
-  save(list);
-  alert('Correct! Next check ' + fmt(list.find(s => s.id === id).nextDue) + '.');
-  render();
+  testId = id;
+  document.getElementById('test-title').textContent = item.name;
+  testInput.value = '';
+  testMsg.hidden = true;
+  testMsg.className = 'msg';
+  testDlg.showModal();
 }
+
+document.getElementById('test-cancel').onclick = () => testDlg.close();
+
+document.getElementById('test-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const item = load().find(s => s.id === testId);
+  if (!item) return testDlg.close();
+  const ok = (await hash(testInput.value, item.salt)) === item.hash;
+  if (!ok) {
+    testMsg.textContent = 'Incorrect.';
+    testMsg.className = 'msg error';
+    testMsg.hidden = false;
+    return;
+  }
+  const list = load().map(s => s.id === testId ? { ...s, nextDue: nextDue(s.days) } : s);
+  save(list);
+  testMsg.textContent = 'Verified. Next check ' + fmt(list.find(s => s.id === testId).nextDue) + '.';
+  testMsg.className = 'msg success';
+  testMsg.hidden = false;
+  setTimeout(() => { testDlg.close(); render(); }, 1200);
+});
 
 const menu = document.getElementById('menu');
 
@@ -103,14 +127,30 @@ document.getElementById('edit-form').addEventListener('submit', e => {
 
 document.getElementById('edit-cancel').onclick = () => menu.close();
 
+const deleteIdle = document.getElementById('delete-idle');
+const deleteConfirming = document.getElementById('delete-confirming');
+
+function resetDelete() {
+  deleteIdle.hidden = false;
+  deleteConfirming.hidden = true;
+}
+
 document.getElementById('edit-delete').onclick = () => {
+  deleteIdle.hidden = true;
+  deleteConfirming.hidden = false;
+};
+
+document.getElementById('delete-no').onclick = resetDelete;
+
+document.getElementById('delete-yes').onclick = () => {
   const id = menu.dataset.id;
-  const item = load().find(s => s.id === id);
-  if (!item || !confirm(`Delete "${item.name}"?`)) return;
   save(load().filter(s => s.id !== id));
+  resetDelete();
   menu.close();
   render();
 };
+
+menu.addEventListener('close', resetDelete);
 
 document.getElementById('add-form').addEventListener('submit', async e => {
   e.preventDefault();

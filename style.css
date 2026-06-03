@@ -98,6 +98,14 @@ li.due .dot { background: var(--due); }
 
 .empty { color: var(--muted); text-align: center; padding: 24px 0; }
 
+.version {
+  margin-top: 32px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
 button.gear {
   padding: 8px 10px;
   font-size: 1.1rem;

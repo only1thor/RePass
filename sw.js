@@ -1,4 +1,4 @@
-const VERSION = 'repass-v2';
+const VERSION = 'repass-v3';
 const FILES = [
   './',
   'index.html',
@@ -24,7 +24,23 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
+self.addEventListener('message', e => {
+  if (e.data?.type === 'version?') {
+    e.source.postMessage({ type: 'version', version: VERSION });
+  }
+});
+
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+  e.respondWith(
+    caches.open(VERSION).then(cache =>
+      cache.match(e.request).then(cached => {
+        const network = fetch(e.request).then(res => {
+          if (res.ok) cache.put(e.request, res.clone());
+          return res;
+        }).catch(() => cached);
+        return cached || network;
+      })
+    )
+  );
 });

@@ -1,3 +1,4 @@
+const APP_VERSION = 'v3';
 const KEY = 'repass_secrets';
 const b64 = bytes => btoa(String.fromCharCode(...bytes));
 
@@ -124,4 +125,17 @@ document.getElementById('add-form').addEventListener('submit', async e => {
 
 render();
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+const versionEl = document.getElementById('version');
+versionEl.textContent = `app ${APP_VERSION}`;
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(reg => reg.update());
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data?.type === 'version') {
+      versionEl.textContent = `app ${APP_VERSION} · sw ${e.data.version}`;
+    }
+  });
+  navigator.serviceWorker.ready.then(reg => {
+    reg.active?.postMessage({ type: 'version?' });
+  });
+}

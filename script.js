@@ -224,6 +224,15 @@ document.getElementById('add-form').addEventListener('submit', async e => {
   render();
 });
 
+[menu, testDlg, importDlg].forEach(dlg => {
+  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+});
+
+testInput.addEventListener('input', () => {
+  testMsg.hidden = true;
+  testMsg.className = 'msg';
+});
+
 document.querySelectorAll('.eye').forEach(btn => {
   btn.onclick = () => {
     const input = document.getElementById(btn.dataset.target);

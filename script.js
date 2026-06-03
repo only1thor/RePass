@@ -1,6 +1,9 @@
 const APP_VERSION = 'v5';
-const KEY = 'repass_secrets';
+const KEY = 'repass_secrets_v2';
+const PBKDF2_ITERS = 600_000;
+localStorage.removeItem('repass_secrets');
 const b64 = bytes => btoa(String.fromCharCode(...bytes));
+const fromB64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 
 const load = () => JSON.parse(localStorage.getItem(KEY) || '[]');
 const save = list => localStorage.setItem(KEY, JSON.stringify(list));
@@ -8,9 +11,19 @@ const save = list => localStorage.setItem(KEY, JSON.stringify(list));
 const randomSalt = () => b64(crypto.getRandomValues(new Uint8Array(16)));
 
 async function hash(secret, salt) {
-  const data = new TextEncoder().encode(secret + salt);
-  const buf = await crypto.subtle.digest('SHA-256', data);
-  return b64(new Uint8Array(buf));
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    'PBKDF2',
+    false,
+    ['deriveBits']
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: fromB64(salt), iterations: PBKDF2_ITERS, hash: 'SHA-256' },
+    key,
+    256
+  );
+  return b64(new Uint8Array(bits));
 }
 
 const nextDue = days => {

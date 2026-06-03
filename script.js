@@ -159,6 +159,7 @@ document.getElementById('add-form').addEventListener('submit', async e => {
   const days = parseInt(document.getElementById('interval').value, 10);
   if (!name || !secret) return;
   await addSecret(name, secret, days);
+  navigator.storage?.persist?.();
   e.target.reset();
   render();
 });

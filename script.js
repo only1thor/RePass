@@ -1,12 +1,14 @@
 const APP_VERSION = 'v7';
 const KEY = 'repass_secrets_v2';
 const PBKDF2_ITERS = 600_000;
+const KDF = `pbkdf2-sha256-${PBKDF2_ITERS}`;
 localStorage.removeItem('repass_secrets');
 const b64 = bytes => btoa(String.fromCharCode(...bytes));
 const fromB64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 
-const load = () => JSON.parse(localStorage.getItem(KEY) || '[]');
-const save = list => localStorage.setItem(KEY, JSON.stringify(list));
+const normalize = list => list.map(s => s.kdf ? s : { ...s, kdf: KDF });
+const load = () => normalize(JSON.parse(localStorage.getItem(KEY) || '[]'));
+const save = list => localStorage.setItem(KEY, JSON.stringify(normalize(list)));
 
 const randomSalt = () => b64(crypto.getRandomValues(new Uint8Array(16)));
 
@@ -45,6 +47,7 @@ async function addSecret(name, secret, days) {
     days,
     salt,
     hash: await hash(secret, salt),
+    kdf: KDF,
     nextDue: nextDue(days),
   });
   save(list);

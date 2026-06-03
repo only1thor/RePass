@@ -49,6 +49,16 @@ async function testSecret(id) {
   render();
 }
 
+function changeCycle(id) {
+  const item = load().find(s => s.id === id);
+  if (!item) return;
+  const input = prompt(`New cycle for "${item.name}" (days):`, item.days);
+  const days = parseInt(input, 10);
+  if (!days || days < 1) return;
+  save(load().map(s => s.id === id ? { ...s, days, nextDue: nextDue(days) } : s));
+  render();
+}
+
 function deleteSecret(id) {
   const item = load().find(s => s.id === id);
   if (!item || !confirm(`Delete "${item.name}"?`)) return;
@@ -75,10 +85,12 @@ function render() {
       </div>
       <div class="actions">
         <button class="ghost test">Test</button>
+        <button class="ghost cycle">Cycle</button>
         <button class="ghost del">Delete</button>
       </div>`;
     li.querySelector('.name').textContent = s.name;
     li.querySelector('.test').onclick = () => testSecret(s.id);
+    li.querySelector('.cycle').onclick = () => changeCycle(s.id);
     li.querySelector('.del').onclick = () => deleteSecret(s.id);
     ul.appendChild(li);
   }

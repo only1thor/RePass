@@ -93,6 +93,6 @@ li.due .dot { background: var(--due); }
 .name { font-weight: 500; }
 .meta { font-size: 0.8rem; color: var(--muted); }
 
-.actions { display: flex; gap: 6px; }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 
 .empty { color: var(--muted); text-align: center; padding: 24px 0; }

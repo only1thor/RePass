@@ -119,6 +119,8 @@ function render() {
     const due = (isDue(b.nextDue) ? 1 : 0) - (isDue(a.nextDue) ? 1 : 0);
     return due !== 0 ? due : a.nextDue.localeCompare(b.nextDue);
   });
+  document.getElementById('add-form').hidden = list.length > 0;
+  document.getElementById('add-btn').hidden = list.length === 0;
   const ul = document.getElementById('list');
   ul.innerHTML = '';
   if (!list.length) {
@@ -230,27 +232,49 @@ document.getElementById('import-form').addEventListener('submit', () => {
 
 importDlg.addEventListener('close', () => { pendingImport = null; });
 
-document.getElementById('add-form').addEventListener('submit', async e => {
-  e.preventDefault();
-  const name = document.getElementById('name').value.trim();
-  const secret = document.getElementById('secret').value;
-  const days = parseInt(document.getElementById('interval').value, 10);
-  if (!name || !secret) return;
-  const submitBtn = e.target.querySelector('button[type=submit]');
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Adding…';
+async function submitAdd(form, nameId, secretId, intervalId) {
+  const name = document.getElementById(nameId).value.trim();
+  const secret = document.getElementById(secretId).value;
+  const days = parseInt(document.getElementById(intervalId).value, 10);
+  if (!name || !secret) return false;
+  const btn = form.querySelector('button[type=submit]');
+  const origText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Adding…';
   try {
     await addSecret(name, secret, days);
     navigator.storage?.persist?.();
   } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Add';
+    btn.disabled = false;
+    btn.textContent = origText;
   }
-  e.target.reset();
-  render();
+  form.reset();
+  return true;
+}
+
+document.getElementById('add-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (await submitAdd(e.target, 'name', 'secret', 'interval')) render();
 });
 
-[menu, testDlg, importDlg].forEach(dlg => {
+const addDlg = document.getElementById('add-dialog');
+
+document.getElementById('add-btn').onclick = () => {
+  document.getElementById('add-dialog-form').reset();
+  addDlg.showModal();
+};
+
+document.getElementById('add-dialog-cancel').onclick = () => addDlg.close();
+
+document.getElementById('add-dialog-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (await submitAdd(e.target, 'dialog-name', 'dialog-secret', 'dialog-interval')) {
+    addDlg.close();
+    render();
+  }
+});
+
+[menu, testDlg, importDlg, addDlg].forEach(dlg => {
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
 });
 

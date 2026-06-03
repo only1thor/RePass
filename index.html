@@ -35,6 +35,8 @@
 
     <ul id="list"></ul>
 
+    <button type="button" id="add-btn" class="add-btn" aria-label="Add secret" hidden>+</button>
+
     <footer class="footer">
       <div class="data-actions">
         <button id="export" type="button" class="link">Export</button>
@@ -65,6 +67,31 @@
           <button type="button" id="delete-yes" class="ghost danger">Yes, delete</button>
         </div>
       </div>
+    </form>
+  </dialog>
+
+  <dialog id="add-dialog">
+    <form method="dialog" id="add-dialog-form">
+      <div class="sheet-head">
+        <button type="button" id="add-dialog-cancel" class="link">Cancel</button>
+        <h2>Add secret</h2>
+        <button type="submit" class="link strong">Add</button>
+      </div>
+      <label>Name <input id="dialog-name" type="text" required></label>
+      <label>Secret
+        <div class="pw">
+          <input id="dialog-secret" type="password" required>
+          <button type="button" class="eye" data-target="dialog-secret" aria-label="Show secret">Show</button>
+        </div>
+      </label>
+      <label>Interval
+        <select id="dialog-interval">
+          <option value="1">Daily</option>
+          <option value="7" selected>Weekly</option>
+          <option value="14">Bi-weekly</option>
+          <option value="30">Monthly</option>
+        </select>
+      </label>
     </form>
   </dialog>
 

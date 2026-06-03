@@ -123,3 +123,5 @@ document.getElementById('add-form').addEventListener('submit', async e => {
 });
 
 render();
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');

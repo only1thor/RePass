@@ -152,6 +152,53 @@ document.getElementById('delete-yes').onclick = () => {
 
 menu.addEventListener('close', resetDelete);
 
+const importFile = document.getElementById('import-file');
+const importDlg = document.getElementById('import-confirm');
+const importText = document.getElementById('import-text');
+let pendingImport = null;
+
+const validImport = data => Array.isArray(data) && data.every(s =>
+  s && typeof s.id === 'string' && typeof s.name === 'string' &&
+  typeof s.days === 'number' && typeof s.salt === 'string' &&
+  typeof s.hash === 'string' && typeof s.nextDue === 'string'
+);
+
+document.getElementById('export').onclick = () => {
+  const blob = new Blob([JSON.stringify(load(), null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `repass-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+document.getElementById('import-btn').onclick = () => importFile.click();
+
+importFile.onchange = async () => {
+  const file = importFile.files[0];
+  importFile.value = '';
+  if (!file) return;
+  let data;
+  try { data = JSON.parse(await file.text()); } catch { return; }
+  if (!validImport(data)) return;
+  pendingImport = data;
+  const current = load().length;
+  importText.textContent =
+    `Replace ${current} ${current === 1 ? 'entry' : 'entries'} with ${data.length} from file?`;
+  importDlg.showModal();
+};
+
+document.getElementById('import-cancel').onclick = () => importDlg.close();
+
+document.getElementById('import-form').addEventListener('submit', () => {
+  if (pendingImport) {
+    save(pendingImport);
+    render();
+  }
+});
+
+importDlg.addEventListener('close', () => { pendingImport = null; });
+
 document.getElementById('add-form').addEventListener('submit', async e => {
   e.preventDefault();
   const name = document.getElementById('name').value.trim();

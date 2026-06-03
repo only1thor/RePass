@@ -100,13 +100,34 @@ li.due .dot { background: var(--due); }
 
 .empty { color: var(--muted); text-align: center; padding: 24px 0; }
 
-.version {
+.footer {
   margin-top: 32px;
+  display: grid;
+  gap: 6px;
   text-align: center;
+}
+
+.version {
   font-size: 0.75rem;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
+
+.data-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+.data-actions button.link {
+  padding: 4px 8px;
+  min-height: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.data-actions .sep { color: var(--muted); font-size: 0.85rem; }
 
 button.gear {
   padding: 8px 10px;

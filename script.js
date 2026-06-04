@@ -6,7 +6,30 @@ localStorage.removeItem('repass_secrets');
 const b64 = bytes => btoa(String.fromCharCode(...bytes));
 const fromB64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
 
-const normalize = list => list.map(s => s.kdf ? s : { ...s, kdf: KDF });
+const normalize = list => list.map(s => {
+  const out = { ...s };
+  if (!out.kdf) out.kdf = KDF;
+  if (out.interval == null) out.interval = out.days ?? 1;
+  if (out.efactor == null) out.efactor = 2.5;
+  if (out.reps == null) out.reps = 0;
+  delete out.days;
+  return out;
+});
+
+function sm2(grade, prior) {
+  let { interval, efactor, reps } = prior;
+  if (grade < 3) {
+    reps = 0;
+    interval = 1;
+  } else {
+    if (reps === 0) interval = 1;
+    else if (reps === 1) interval = 6;
+    else interval = Math.round(interval * efactor);
+    reps += 1;
+  }
+  efactor = Math.max(1.3, efactor + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02)));
+  return { interval, efactor, reps };
+}
 const load = () => normalize(JSON.parse(localStorage.getItem(KEY) || '[]'));
 const save = list => localStorage.setItem(KEY, JSON.stringify(normalize(list)));
 
@@ -28,7 +51,7 @@ async function hash(secret, salt) {
   return b64(new Uint8Array(bits));
 }
 
-const nextDue = days => {
+const dueFromNow = days => {
   const d = new Date();
   d.setDate(d.getDate() + days);
   return d.toISOString();
@@ -38,17 +61,19 @@ const isDue = iso => new Date(iso) <= new Date();
 
 const fmt = iso => new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
-async function addSecret(name, secret, days) {
+async function addSecret(name, secret) {
   const salt = randomSalt();
   const list = load();
   list.push({
     id: crypto.randomUUID(),
     name,
-    days,
     salt,
     hash: await hash(secret, salt),
     kdf: KDF,
-    nextDue: nextDue(days),
+    interval: 1,
+    efactor: 2.5,
+    reps: 0,
+    nextDue: dueFromNow(1),
   });
   save(list);
 }
@@ -58,6 +83,10 @@ const testMsg = document.getElementById('test-msg');
 const testInput = document.getElementById('test-input');
 let testId = null;
 
+const testInputSection = document.getElementById('test-input-section');
+const testGradeSection = document.getElementById('test-grade-section');
+const testVerifyBtn = document.getElementById('test-verify');
+
 function testSecret(id) {
   const item = load().find(s => s.id === id);
   if (!item) return;
@@ -66,6 +95,11 @@ function testSecret(id) {
   testInput.value = '';
   testMsg.hidden = true;
   testMsg.className = 'msg';
+  testInputSection.hidden = false;
+  testGradeSection.hidden = true;
+  testVerifyBtn.hidden = false;
+  testVerifyBtn.disabled = false;
+  testVerifyBtn.textContent = 'Verify';
   testDlg.showModal();
 }
 
@@ -75,15 +109,14 @@ document.getElementById('test-form').addEventListener('submit', async e => {
   e.preventDefault();
   const item = load().find(s => s.id === testId);
   if (!item) return testDlg.close();
-  const submitBtn = e.target.querySelector('button[type=submit]');
-  submitBtn.disabled = true;
-  submitBtn.textContent = 'Verifying…';
+  testVerifyBtn.disabled = true;
+  testVerifyBtn.textContent = 'Verifying…';
   let ok;
   try {
     ok = (await hash(testInput.value, item.salt)) === item.hash;
   } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Verify';
+    testVerifyBtn.disabled = false;
+    testVerifyBtn.textContent = 'Verify';
   }
   if (!ok) {
     testMsg.textContent = 'Incorrect.';
@@ -91,15 +124,31 @@ document.getElementById('test-form').addEventListener('submit', async e => {
     testMsg.hidden = false;
     return;
   }
-  const now = new Date().toISOString();
-  const list = load().map(s => s.id === testId
-    ? { ...s, nextDue: nextDue(s.days), lastVerified: now }
-    : s);
-  save(list);
-  testMsg.textContent = 'Verified. Next check ' + fmt(list.find(s => s.id === testId).nextDue) + '.';
-  testMsg.className = 'msg success';
-  testMsg.hidden = false;
-  setTimeout(() => { testDlg.close(); render(); }, 1200);
+  testMsg.hidden = true;
+  testInputSection.hidden = true;
+  testVerifyBtn.hidden = true;
+  testGradeSection.hidden = false;
+});
+
+document.querySelectorAll('#test-grade-section .grade').forEach(btn => {
+  btn.onclick = () => {
+    const grade = parseInt(btn.dataset.grade, 10);
+    const item = load().find(s => s.id === testId);
+    if (!item) return testDlg.close();
+    const updated = sm2(grade, item);
+    const newItem = {
+      ...item,
+      ...updated,
+      lastVerified: new Date().toISOString(),
+      nextDue: dueFromNow(updated.interval),
+    };
+    save(load().map(s => s.id === testId ? newItem : s));
+    testMsg.textContent = `Next check ${fmt(newItem.nextDue)}.`;
+    testMsg.className = 'msg success';
+    testMsg.hidden = false;
+    testGradeSection.hidden = true;
+    setTimeout(() => { testDlg.close(); render(); }, 1200);
+  };
 });
 
 const menu = document.getElementById('menu');
@@ -110,7 +159,6 @@ function openMenu(id) {
   menu.dataset.id = id;
   document.getElementById('edit-title').textContent = item.name;
   document.getElementById('edit-name').value = item.name;
-  document.getElementById('edit-days').value = item.days;
   menu.showModal();
 }
 
@@ -132,7 +180,7 @@ function render() {
       <span class="dot"></span>
       <div>
         <div class="name"></div>
-        <div class="meta">Every ${s.days}d · next ${fmt(s.nextDue)}${s.lastVerified ? ` · last ${fmt(s.lastVerified)}` : ''}</div>
+        <div class="meta">${s.interval}d · next ${fmt(s.nextDue)}${s.lastVerified ? ` · last ${fmt(s.lastVerified)}` : ''}</div>
       </div>
       <div class="actions">
         <button class="ghost test">Test</button>
@@ -148,11 +196,8 @@ function render() {
 document.getElementById('edit-form').addEventListener('submit', e => {
   const id = menu.dataset.id;
   const name = document.getElementById('edit-name').value.trim();
-  const days = parseInt(document.getElementById('edit-days').value, 10);
-  if (!name || !days || days < 1) { e.preventDefault(); return; }
-  save(load().map(s => s.id === id
-    ? { ...s, name, days, nextDue: days !== s.days ? nextDue(days) : s.nextDue }
-    : s));
+  if (!name) { e.preventDefault(); return; }
+  save(load().map(s => s.id === id ? { ...s, name } : s));
   render();
 });
 
@@ -190,8 +235,9 @@ let pendingImport = null;
 
 const validImport = data => Array.isArray(data) && data.every(s =>
   s && typeof s.id === 'string' && typeof s.name === 'string' &&
-  typeof s.days === 'number' && typeof s.salt === 'string' &&
-  typeof s.hash === 'string' && typeof s.nextDue === 'string'
+  typeof s.salt === 'string' && typeof s.hash === 'string' &&
+  typeof s.nextDue === 'string' &&
+  (typeof s.interval === 'number' || typeof s.days === 'number')
 );
 
 document.getElementById('export').onclick = () => {
@@ -243,13 +289,12 @@ document.getElementById('add-dialog-form').addEventListener('submit', async e =>
   e.preventDefault();
   const name = document.getElementById('dialog-name').value.trim();
   const secret = document.getElementById('dialog-secret').value;
-  const days = parseInt(document.getElementById('dialog-interval').value, 10);
   if (!name || !secret) return;
   const btn = e.target.querySelector('button[type=submit]');
   btn.disabled = true;
   btn.textContent = 'Adding…';
   try {
-    await addSecret(name, secret, days);
+    await addSecret(name, secret);
     navigator.storage?.persist?.();
   } finally {
     btn.disabled = false;

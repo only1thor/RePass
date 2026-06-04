@@ -226,6 +226,18 @@ button.link.strong { font-weight: 700; }
   gap: 14px;
 }
 
+.grade-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.grade-row .grade { flex: 1; }
+.grade-row .grade[data-grade="1"] {
+  background: transparent;
+  color: var(--due);
+  border: 1px solid var(--due);
+}
+
 #add-dialog-form label {
   display: grid;
   gap: 6px;

@@ -41,7 +41,6 @@
         <button type="submit" class="link strong">Save</button>
       </div>
       <label>Name <input id="edit-name" type="text" required></label>
-      <label>Cycle (days) <input id="edit-days" type="number" min="1" required></label>
       <div id="delete-idle">
         <button type="button" id="edit-delete" class="ghost danger">Delete</button>
       </div>
@@ -69,14 +68,6 @@
           <button type="button" class="eye" data-target="dialog-secret" aria-label="Show secret">Show</button>
         </div>
       </label>
-      <label>Interval
-        <select id="dialog-interval">
-          <option value="1">Daily</option>
-          <option value="7" selected>Weekly</option>
-          <option value="14">Bi-weekly</option>
-          <option value="30">Monthly</option>
-        </select>
-      </label>
     </form>
   </dialog>
 
@@ -96,14 +87,24 @@
       <div class="sheet-head">
         <button type="button" id="test-cancel" class="link">Cancel</button>
         <h2 id="test-title">Test</h2>
-        <button type="submit" class="link strong">Verify</button>
+        <button type="submit" id="test-verify" class="link strong">Verify</button>
       </div>
-      <label>Secret
-        <div class="pw">
-          <input id="test-input" type="password" autocomplete="off" required>
-          <button type="button" class="eye" data-target="test-input" aria-label="Show secret">Show</button>
+      <div id="test-input-section">
+        <label>Secret
+          <div class="pw">
+            <input id="test-input" type="password" autocomplete="off" required>
+            <button type="button" class="eye" data-target="test-input" aria-label="Show secret">Show</button>
+          </div>
+        </label>
+      </div>
+      <div id="test-grade-section" hidden>
+        <p class="confirm-text">How easy was it?</p>
+        <div class="grade-row">
+          <button type="button" class="grade" data-grade="1">Again</button>
+          <button type="button" class="grade" data-grade="4">Good</button>
+          <button type="button" class="grade" data-grade="5">Easy</button>
         </div>
-      </label>
+      </div>
       <p id="test-msg" class="msg" hidden></p>
     </form>
   </dialog>

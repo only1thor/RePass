@@ -285,6 +285,14 @@ const versionEl = document.getElementById('version');
 versionEl.textContent = `app ${APP_VERSION}`;
 
 if ('serviceWorker' in navigator) {
+  if (navigator.serviceWorker.controller) {
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloaded) return;
+      reloaded = true;
+      location.reload();
+    });
+  }
   navigator.serviceWorker.register('sw.js').then(reg => reg.update());
   navigator.serviceWorker.addEventListener('message', e => {
     if (e.data?.type === 'version') {

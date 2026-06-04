@@ -48,7 +48,7 @@ data-model details.
 | `sw.js` | Service worker — caches static files for offline use |
 | `manifest.webmanifest` | PWA metadata (name, icons, theme colour) |
 | `icon-*.png` | Home-screen icons (180/192/512) |
-| `docs/` | Design notes worth keeping (see `docs/backup-format.md`) |
+| `docs/` | Design notes worth keeping (`docs/backup-format.md`, `docs/csp.md`) |
 | `.github/workflows/pages.yml` | Deploys to GitHub Pages on push to `main` |
 
 ## Local development

@@ -11,18 +11,25 @@ No backend. No accounts. No network calls after first load.
 When you add a secret:
 
 1. A fresh 16-byte salt is generated with `crypto.getRandomValues`.
-2. `SHA-256(secret + salt)` is computed via `crypto.subtle.digest`.
-3. Only the **hash**, the **salt**, the **name**, the **cycle length**, and
-   the **next-due date** are written to `localStorage`. The plaintext
-   secret is never persisted.
+2. PBKDF2-SHA-256 at 600,000 iterations is run over `(secret, salt)`
+   via `crypto.subtle.deriveBits`.
+3. Only the **hash**, the **salt**, the **name**, the **scheduling
+   state** (SM-2: `interval`, `efactor`, `reps`), and the **next-due
+   date** are written to `localStorage`. The plaintext secret is never
+   persisted.
 
 When you tap **Test**, your input is hashed with the stored salt and
-compared against the stored hash. On success the next-due date rolls
-forward by the cycle length.
+compared against the stored hash. On a successful match you grade
+yourself — Again / Good / Easy — and the SM-2 algorithm computes a new
+interval. A wrong input is not auto-graded; you can retry or close out
+without affecting the schedule.
 
 Because the salt is per-secret and random, identical secrets across
-entries produce different hashes, and the stored data alone can't be used
-to crack a secret without trying every candidate input.
+entries produce different hashes, and the stored data alone can't be
+used to crack a secret without trying every candidate input.
+
+See `docs/backup-format.md` for the SM-2 grading table and the full
+data-model details.
 
 ## Install as a PWA on iOS
 

@@ -13,12 +13,14 @@ A backup is a top-level JSON array of secret entries:
   {
     "id": "8a3d1b2e-…",
     "name": "Bank PIN",
-    "days": 7,
     "salt": "OwtnKV/16shIaIpMshekPg==",
     "hash": "JApwOXvg/K/DTNYLFW5NRVo/A5fbD0Kn3+brWbF+YSs=",
     "kdf": "pbkdf2-sha256-600000",
+    "interval": 6,
+    "efactor": 2.5,
+    "reps": 2,
     "nextDue": "2026-06-10T09:55:51.881Z",
-    "lastVerified": "2026-06-03T09:55:51.881Z"
+    "lastVerified": "2026-06-04T09:55:51.881Z"
   }
 ]
 ```
@@ -34,17 +36,26 @@ write back to the same key.
 |---|---|---|---|
 | `id` | string | yes | Stable identifier (`crypto.randomUUID()`). |
 | `name` | string | yes | Human label for the secret. |
-| `days` | number | yes | Reminder interval in days. |
 | `salt` | string (base64) | yes | 16 random bytes generated per secret with `crypto.getRandomValues`. |
 | `hash` | string (base64) | yes | Output of the KDF identified by `kdf`, applied to `(secret, salt)`. |
 | `kdf` | string | yes (lazy-filled) | KDF identifier (see below). |
+| `interval` | number | yes (lazy-filled) | Current SM-2 interval in days. |
+| `efactor` | number | yes (lazy-filled) | SM-2 ease factor. Starts at 2.5, floor 1.3. |
+| `reps` | number | yes (lazy-filled) | Consecutive successful repetitions. Resets to 0 on a lapse. |
 | `nextDue` | string (ISO date) | yes | When the secret is next due for verification. |
 | `lastVerified` | string (ISO date) | no | Set when verification last succeeded. Absent until the secret has been verified at least once. |
 
-The import validator requires `id`, `name`, `days`, `salt`, `hash`, and
-`nextDue`. Missing `kdf` is tolerated and lazy-filled with the current
-default; this keeps backups exported by older builds importable into
-newer ones.
+The import validator requires `id`, `name`, `salt`, `hash`, `nextDue`,
+and *either* `interval` or the legacy `days`. Other missing fields are
+lazy-filled with the current defaults; this keeps backups exported by
+older builds importable into newer ones.
+
+### Legacy `days` field
+
+Pre-SM-2 entries carried a fixed `days` interval. On load (or on save
+after import), `normalize()` copies `days` into `interval` and removes
+`days`. After one round-trip through the running app, no entry retains
+the legacy field.
 
 ## The `kdf` field
 
@@ -98,6 +109,57 @@ const KDF = `pbkdf2-sha256-${PBKDF2_ITERS}`;
 
 Bumping `PBKDF2_ITERS` automatically produces a new identifier, so
 there is no second place to remember updating.
+
+## SM-2 scheduling
+
+Reviews use a small, inline implementation of the SM-2 algorithm
+(Wozniak, 1990). The scheduling state lives on each entry as the
+fields `interval`, `efactor`, and `reps`.
+
+### Grading
+
+The UI surfaces three grade buttons after a successful verify; they
+map to SM-2 quality values:
+
+| Button | SM-2 grade | Effect |
+|---|---|---|
+| Again | 1 | Lapse. `reps` → 0, `interval` → 1 day, `efactor` decreases. |
+| Good | 4 | Normal progression. `efactor` stays roughly flat. |
+| Easy | 5 | Progression with bonus. `efactor` increases by 0.1. |
+
+A wrong input on Verify is not automatically graded. The user can
+retry or close out; closing leaves the schedule untouched. This trades
+strict Anki parity for tolerance of typos, since RePass can't show
+the answer to disambiguate "didn't remember" from "fat-fingered it".
+
+### Algorithm
+
+```
+if grade < 3:
+    reps = 0
+    interval = 1
+else:
+    if reps == 0: interval = 1
+    elif reps == 1: interval = 6
+    else:          interval = round(interval * efactor)
+    reps += 1
+efactor = max(1.3, efactor + (0.1 - (5 - grade) * (0.08 + (5 - grade) * 0.02)))
+```
+
+### Why SM-2 and not FSRS
+
+Anki now defaults to FSRS, which is measurably more accurate at scale.
+That edge depends on:
+
+- thousands of reviews per user to train the per-deck parameters, and
+- richer difficulty signals than a binary "did the input match the hash".
+
+Neither applies here. SM-2 fits in ten readable lines, exposes three
+human-interpretable state variables, and produces indistinguishable
+predictions for the handful of secrets a user is realistically going to
+track. Switching later would require a fresh data model (`stability`,
+`difficulty`, last-review date) — there's no clean migration path from
+SM-2 state to FSRS state, so this is effectively a one-way choice.
 
 ## Future migration path (not implemented)
 

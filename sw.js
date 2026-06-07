@@ -1,4 +1,4 @@
-const VERSION = 'repass-v21';
+const VERSION = 'repass-v22';
 const FILES = [
   './',
   'index.html',

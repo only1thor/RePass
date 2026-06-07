@@ -1,4 +1,4 @@
-const APP_VERSION = 'v21';
+const APP_VERSION = 'v22';
 const KEY = 'repass_secrets_v2';
 const PBKDF2_ITERS = 600_000;
 const KDF = `pbkdf2-sha256-${PBKDF2_ITERS}`;
@@ -136,6 +136,14 @@ document.getElementById('test-form').addEventListener('submit', async e => {
   testInputSection.hidden = true;
   testVerifyBtn.hidden = true;
   testGradeSection.hidden = false;
+});
+
+document.addEventListener('keydown', e => {
+  if (!testDlg.open || testGradeSection.hidden) return;
+  const idx = ['1', '2', '3'].indexOf(e.key);
+  if (idx < 0) return;
+  e.preventDefault();
+  document.querySelectorAll('#test-grade-section .grade')[idx]?.click();
 });
 
 document.querySelectorAll('#test-grade-section .grade').forEach(btn => {

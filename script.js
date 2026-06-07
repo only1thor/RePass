@@ -1,4 +1,4 @@
-const APP_VERSION = 'v18';
+const APP_VERSION = 'v19';
 const KEY = 'repass_secrets_v2';
 const PBKDF2_ITERS = 600_000;
 const KDF = `pbkdf2-sha256-${PBKDF2_ITERS}`;
@@ -362,6 +362,34 @@ if ('serviceWorker' in navigator) {
     reg.active?.postMessage({ type: 'version?' });
   });
 }
+
+const installBtn = document.getElementById('install');
+const installSep = document.getElementById('install-sep');
+let deferredInstall = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstall = e;
+  installBtn.hidden = false;
+  installSep.hidden = false;
+});
+
+installBtn.onclick = async () => {
+  if (!deferredInstall) return;
+  installBtn.disabled = true;
+  deferredInstall.prompt();
+  await deferredInstall.userChoice;
+  deferredInstall = null;
+  installBtn.hidden = true;
+  installSep.hidden = true;
+  installBtn.disabled = false;
+};
+
+window.addEventListener('appinstalled', () => {
+  deferredInstall = null;
+  installBtn.hidden = true;
+  installSep.hidden = true;
+});
 
 document.getElementById('force-update').onclick = async () => {
   const btn = document.getElementById('force-update');

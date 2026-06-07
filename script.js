@@ -1,4 +1,4 @@
-const APP_VERSION = 'v16';
+const APP_VERSION = 'v17';
 const KEY = 'repass_secrets_v2';
 const PBKDF2_ITERS = 600_000;
 const KDF = `pbkdf2-sha256-${PBKDF2_ITERS}`;
@@ -60,6 +60,13 @@ const dueFromNow = days => {
 const isDue = iso => new Date(iso) <= new Date();
 
 const fmt = iso => new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+const relativeDue = iso => {
+  const a = new Date(iso); a.setHours(0, 0, 0, 0);
+  const b = new Date();    b.setHours(0, 0, 0, 0);
+  const d = Math.round((a - b) / 86400000);
+  return `due ${d}d`;
+};
 
 async function addSecret(name, secret) {
   const salt = randomSalt();
@@ -187,7 +194,7 @@ function render() {
       <span class="dot"></span>
       <div>
         <div class="name"></div>
-        <div class="meta">${s.interval}d · next ${fmt(s.nextDue)}</div>
+        <div class="meta">${relativeDue(s.nextDue)}</div>
       </div>
       <div class="actions">
         <button class="ghost test">Test</button>

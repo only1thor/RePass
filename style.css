@@ -149,6 +149,19 @@ li > div {
   min-width: 0;
 }
 
+@media (max-width: 480px) {
+  li {
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "badge content"
+      "actions actions";
+    row-gap: 8px;
+  }
+  li > .dot     { grid-area: badge; }
+  li > div:not(.actions) { grid-area: content; }
+  li > .actions { grid-area: actions; justify-content: flex-end; }
+}
+
 .dot {
   width: auto;
   height: auto;

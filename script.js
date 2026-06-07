@@ -1,4 +1,4 @@
-const APP_VERSION = 'v14';
+const APP_VERSION = 'v15';
 const KEY = 'repass_secrets_v2';
 const PBKDF2_ITERS = 600_000;
 const KDF = `pbkdf2-sha256-${PBKDF2_ITERS}`;
@@ -348,3 +348,21 @@ if ('serviceWorker' in navigator) {
     reg.active?.postMessage({ type: 'version?' });
   });
 }
+
+document.getElementById('force-update').onclick = async () => {
+  const btn = document.getElementById('force-update');
+  btn.disabled = true;
+  btn.textContent = 'Updating';
+  try {
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+  } finally {
+    location.reload();
+  }
+};

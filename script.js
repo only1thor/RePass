@@ -1,4 +1,4 @@
-const APP_VERSION = 'v13';
+const APP_VERSION = 'v14';
 const KEY = 'repass_secrets_v2';
 const PBKDF2_ITERS = 600_000;
 const KDF = `pbkdf2-sha256-${PBKDF2_ITERS}`;
@@ -180,7 +180,7 @@ function render() {
       <span class="dot"></span>
       <div>
         <div class="name"></div>
-        <div class="meta">${s.interval}d · next ${fmt(s.nextDue)}${s.lastVerified ? ` · last ${fmt(s.lastVerified)}` : ''}</div>
+        <div class="meta">${s.interval}d · next ${fmt(s.nextDue)}</div>
       </div>
       <div class="actions">
         <button class="ghost test">Test</button>

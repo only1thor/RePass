@@ -1,4 +1,4 @@
-const APP_VERSION = 'v15';
+const APP_VERSION = 'v16';
 const KEY = 'repass_secrets_v2';
 const PBKDF2_ITERS = 600_000;
 const KDF = `pbkdf2-sha256-${PBKDF2_ITERS}`;
@@ -162,11 +162,18 @@ function openMenu(id) {
   menu.showModal();
 }
 
+function updateBadge(count) {
+  if (!('setAppBadge' in navigator)) return;
+  const p = count > 0 ? navigator.setAppBadge(count) : navigator.clearAppBadge?.();
+  p?.catch?.(() => {});
+}
+
 function render() {
   const list = load().sort((a, b) => {
     const due = (isDue(b.nextDue) ? 1 : 0) - (isDue(a.nextDue) ? 1 : 0);
     return due !== 0 ? due : a.nextDue.localeCompare(b.nextDue);
   });
+  updateBadge(list.filter(s => isDue(s.nextDue)).length);
   const ul = document.getElementById('list');
   ul.innerHTML = '';
   if (!list.length) {

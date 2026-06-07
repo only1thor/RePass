@@ -1,4 +1,4 @@
-const APP_VERSION = 'v20';
+const APP_VERSION = 'v21';
 const KEY = 'repass_secrets_v2';
 const PBKDF2_ITERS = 600_000;
 const KDF = `pbkdf2-sha256-${PBKDF2_ITERS}`;
@@ -108,6 +108,7 @@ function testSecret(id) {
   testVerifyBtn.disabled = false;
   testVerifyBtn.textContent = 'Verify';
   testDlg.showModal();
+  testInput.focus();
 }
 
 document.getElementById('test-cancel').onclick = () => testDlg.close();
@@ -295,6 +296,7 @@ const addDlg = document.getElementById('add-dialog');
 document.getElementById('add-btn').onclick = () => {
   document.getElementById('add-dialog-form').reset();
   addDlg.showModal();
+  document.getElementById('dialog-name').focus();
 };
 
 document.getElementById('add-dialog-cancel').onclick = () => addDlg.close();

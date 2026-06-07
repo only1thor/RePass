@@ -1,4 +1,4 @@
-const APP_VERSION = 'v17';
+const APP_VERSION = 'v18';
 const KEY = 'repass_secrets_v2';
 const PBKDF2_ITERS = 600_000;
 const KDF = `pbkdf2-sha256-${PBKDF2_ITERS}`;

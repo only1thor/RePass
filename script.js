@@ -1,4 +1,4 @@
-const APP_VERSION = 'v19';
+const APP_VERSION = 'v20';
 const KEY = 'repass_secrets_v2';
 const PBKDF2_ITERS = 600_000;
 const KDF = `pbkdf2-sha256-${PBKDF2_ITERS}`;
@@ -390,6 +390,14 @@ window.addEventListener('appinstalled', () => {
   installBtn.hidden = true;
   installSep.hidden = true;
 });
+
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                     navigator.standalone === true;
+if (isIOS && !isStandalone) {
+  document.getElementById('ios-hint').hidden = false;
+}
 
 document.getElementById('force-update').onclick = async () => {
   const btn = document.getElementById('force-update');

@@ -214,6 +214,18 @@ li.due .dot::before { content: "[due]"; }
   font-variant-numeric: tabular-nums;
 }
 
+.hint {
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-align: center;
+  text-transform: lowercase;
+}
+.hint::before {
+  content: "// ";
+  color: var(--accent-dim);
+}
+
 .data-actions {
   display: flex;
   justify-content: center;

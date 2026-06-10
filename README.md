@@ -6,6 +6,19 @@ forget the ones you rarely use.
 
 No backend. No accounts. No network calls after first load.
 
+## Demo
+
+<p align="center">
+  <img src="docs/media/demo.gif" alt="Testing a secret and grading recall" width="300">
+</p>
+
+A full pass: pick a due secret, type it from memory, verify against the
+stored hash, then grade how easily it came back.
+
+| Your secrets | Add one | Test recall | Grade it |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/media/list.png" alt="List of secrets with due status" width="200"> | <img src="docs/media/add.png" alt="Add-secret sheet" width="200"> | <img src="docs/media/test.png" alt="Entering a secret to test" width="200"> | <img src="docs/media/grade.png" alt="Again / Good / Easy grading" width="200"> |
+
 ## How it works
 
 When you add a secret:
